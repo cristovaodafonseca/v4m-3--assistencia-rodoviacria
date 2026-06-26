@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedido Rápido — V4M</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .auth-container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .auth-card { width: 100%; max-width: 480px; }
+    .auth-header { text-align: center; margin-bottom: 32px; }
+    .auth-header h1 { font-size: 1.5rem; margin-bottom: 8px; }
+    .auth-header p { color: rgba(255,255,255,0.5); font-size: 0.875rem; }
+    .step-indicator { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 32px; }
+    .step-dot { width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 600; color: rgba(255,255,255,0.4); transition: all 0.3s; }
+    .step-dot.active { background: #D7FF00; color: #000; }
+    .step-dot.done { background: #22C55E; color: #fff; }
+    .step-line { width: 32px; height: 2px; background: rgba(255,255,255,0.1); }
+    .step-line.done { background: #22C55E; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .step h2 { font-size: 1.25rem; margin-bottom: 8px; }
+    .step p { color: rgba(255,255,255,0.5); font-size: 0.875rem; margin-bottom: 24px; }
+    .problem-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .problem-option { padding: 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; cursor: pointer; text-align: center; transition: all 0.3s; }
+    .problem-option:hover { border-color: rgba(215,255,0,0.3); }
+    .problem-option.selected { border-color: #D7FF00; background: rgba(215,255,0,0.05); }
+    .problem-option span { font-size: 0.875rem; font-weight: 500; }
+    .step-actions { display: flex; gap: 12px; margin-top: 32px; }
+    .step-actions .btn { flex: 1; }
+    .success-card { text-align: center; padding: 48px 24px; }
+    .success-icon { width: 80px; height: 80px; background: rgba(34, 197, 94, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
+    .error-msg { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #EF4444; padding: 12px 16px; border-radius: 12px; font-size: 0.875rem; display: none; margin-bottom: 16px; }
+    .back-link { display: inline-flex; align-items: center; gap: 8px; color: rgba(255,255,255,0.5); font-size: 0.875rem; margin-bottom: 24px; transition: color 0.3s; }
+    .back-link:hover { color: #D7FF00; }
+    .location-btn { width: 100%; padding: 16px; background: rgba(215,255,0,0.1); border: 1px dashed rgba(215,255,0,0.3); border-radius: 12px; cursor: pointer; text-align: center; transition: all 0.3s; margin-bottom: 16px; }
+    .location-btn:hover { background: rgba(215,255,0,0.15); }
+    .location-btn span { color: #D7FF00; font-weight: 500; font-size: 0.9375rem; }
+    .location-status { font-size: 0.8125rem; color: rgba(255,255,255,0.4); margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="auth-container">
+    <div class="auth-card">
+      <a href="/entrar" class="back-link">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        Voltar ao login
+      </a>
+      <div class="auth-header">
+        <a href="/" style="display: inline-block; margin-bottom: 16px;">
+          <span class="logo-text" style="font-size: 1.5rem;">V<span class="text-yellow">4</span>M</span>
+        </a>
+        <h1>Pedido Rápido</h1>
+        <p>Sem necessidade de conta. Apenas os dados essenciais.</p>
+      </div>
+
+      <!-- Step Indicator -->
+      <div class="step-indicator">
+        <div class="step-dot active" id="dot-1">1</div>
+        <div class="step-line" id="line-1"></div>
+        <div class="step-dot" id="dot-2">2</div>
+        <div class="step-line" id="line-2"></div>
+        <div class="step-dot" id="dot-3">3</div>
+        <div class="step-line" id="line-3"></div>
+        <div class="step-dot" id="dot-4">4</div>
+      </div>
+
+      <div id="error-msg" class="error-msg"></div>
+
+      <!-- Step 1: Dados pessoais -->
+      <div class="step active" id="step-1">
+        <h2>Os seus dados</h2>
+        <p>Para podermos entrar em contacto consigo.</p>
+        <form id="form-step-1">
+          <div class="form-group">
+            <label class="form-label">Nome</label>
+            <input type="text" id="guest-name" class="form-input" placeholder="O seu nome" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Telefone / WhatsApp</label>
+            <input type="tel" id="guest-phone" class="form-input" placeholder="+244 9XX XXX XXX" required>
+          </div>
+          <div class="step-actions">
+            <button type="submit" class="btn btn-primary">Próximo</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Step 2: Localização -->
+      <div class="step" id="step-2">
+        <h2>Onde está?</h2>
+        <p>Partilhe a sua localização para encontrarmos.</p>
+        <div class="location-btn" id="location-btn" onclick="getLocation()">
+          <svg width="24" height="24" fill="none" stroke="#D7FF00" stroke-width="1.5" viewBox="0 0 24 24" style="margin-bottom: 8px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+          <br><span>Usar a minha localização</span>
+          <div class="location-status" id="location-status"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Morada (opcional)</label>
+          <input type="text" id="address" class="form-input" placeholder="Ex: Rua X, Bairro Y">
+        </div>
+        <div class="step-actions">
+          <button type="button" class="btn btn-outline" onclick="prevStep()">Anterior</button>
+          <button type="button" class="btn btn-primary" onclick="nextStep()">Próximo</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Problema -->
+      <div class="step" id="step-3">
+        <h2>Qual é o problema?</h2>
+        <p>Selecione o tipo de problema.</p>
+        <div class="problem-options">
+          <div class="problem-option" data-value="furo" onclick="selectProblem(this)">
+            <span>Furo</span>
+          </div>
+          <div class="problem-option" data-value="nao_liga" onclick="selectProblem(this)">
+            <span>Não liga</span>
+          </div>
+          <div class="problem-option" data-value="bateria" onclick="selectProblem(this)">
+            <span>Bateria</span>
+          </div>
+          <div class="problem-option" data-value="combustivel" onclick="selectProblem(this)">
+            <span>Sem combustível</span>
+          </div>
+          <div class="problem-option" data-value="eletrico" onclick="selectProblem(this)">
+            <span>Eléctrico</span>
+          </div>
+          <div class="problem-option" data-value="outro" onclick="selectProblem(this)">
+            <span>Outro</span>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top: 16px;">
+          <label class="form-label">Descrição (opcional)</label>
+          <textarea id="description" class="form-textarea" placeholder="Descreva o problema..." rows="3"></textarea>
+        </div>
+        <div class="step-actions">
+          <button type="button" class="btn btn-outline" onclick="prevStep()">Anterior</button>
+          <button type="button" class="btn btn-primary" onclick="nextStep()">Próximo</button>
+        </div>
+      </div>
+
+      <!-- Step 4: Confirmar -->
+      <div class="step" id="step-4">
+        <h2>Confirmar pedido</h2>
+        <p>Revise os dados antes de enviar.</p>
+        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 20px; margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+            <span style="color: rgba(255,255,255,0.4); font-size: 0.875rem;">Nome</span>
+            <span style="font-size: 0.875rem; font-weight: 500;" id="confirm-name"></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+            <span style="color: rgba(255,255,255,0.4); font-size: 0.875rem;">Telefone</span>
+            <span style="font-size: 0.875rem; font-weight: 500;" id="confirm-phone"></span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+            <span style="color: rgba(255,255,255,0.4); font-size: 0.875rem;">Localização</span>
+            <span style="font-size: 0.875rem; font-weight: 500;" id="confirm-location"></span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: rgba(255,255,255,0.4); font-size: 0.875rem;">Problema</span>
+            <span style="font-size: 0.875rem; font-weight: 500;" id="confirm-problem"></span>
+          </div>
+        </div>
+        <div class="step-actions">
+          <button type="button" class="btn btn-outline" onclick="prevStep()">Anterior</button>
+          <button type="button" class="btn btn-primary" onclick="submitRequest()">Enviar Pedido</button>
+        </div>
+      </div>
+
+      <!-- Step 5: Sucesso -->
+      <div class="step" id="step-5">
+        <div class="success-card">
+          <div class="success-icon">
+            <svg width="40" height="40" fill="none" stroke="#22C55E" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+          </div>
+          <h2 style="margin-bottom: 8px;">Pedido Enviado!</h2>
+          <p style="margin-bottom: 32px;">A nossa equipa foi notificada e em breve entrará em contacto.</p>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <a href="/entrar" class="btn btn-primary" style="width: 100%;">Criar conta para futuros pedidos</a>
+            <a href="/" class="btn btn-outline" style="width: 100%;">Voltar ao início</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    let currentStep = 1;
+    let locationData = { lat: null, lng: null };
+    let selectedProblem = null;
+
+    function showStep(step) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById(`step-${step}`).classList.add('active');
+
+      for (let i = 1; i <= 4; i++) {
+        const dot = document.getElementById(`dot-${i}`);
+        const line = document.getElementById(`line-${i}`);
+        dot.classList.remove('active', 'done');
+        if (line) line.classList.remove('done');
+        if (i < step) { dot.classList.add('done'); if (line) line.classList.add('done'); }
+        else if (i === step) dot.classList.add('active');
+      }
+    }
+
+    function nextStep() {
+      if (currentStep === 2 && !locationData.lat) {
+        document.getElementById('error-msg').textContent = 'Por favor, partilhe a sua localização.';
+        document.getElementById('error-msg').style.display = 'block';
+        return;
+      }
+      if (currentStep === 3 && !selectedProblem) {
+        document.getElementById('error-msg').textContent = 'Por favor, selecione o tipo de problema.';
+        document.getElementById('error-msg').style.display = 'block';
+        return;
+      }
+      document.getElementById('error-msg').style.display = 'none';
+
+      if (currentStep === 3) {
+        document.getElementById('confirm-name').textContent = document.getElementById('guest-name').value;
+        document.getElementById('confirm-phone').textContent = document.getElementById('guest-phone').value;
+        document.getElementById('confirm-location').textContent = document.getElementById('address').value || `${locationData.lat?.toFixed(4)}, ${locationData.lng?.toFixed(4)}`;
+        document.getElementById('confirm-problem').textContent = getProblemLabel(selectedProblem);
+      }
+
+      currentStep++;
+      showStep(currentStep);
+    }
+
+    function prevStep() {
+      currentStep--;
+      showStep(currentStep);
+    }
+
+    function selectProblem(el) {
+      document.querySelectorAll('.problem-option').forEach(o => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedProblem = el.dataset.value;
+    }
+
+    function getLocation() {
+      const status = document.getElementById('location-status');
+      status.textContent = 'A obter localização...';
+      status.style.color = '#D7FF00';
+
+      if (!navigator.geolocation) {
+        status.textContent = 'Geolocalização não suportada';
+        status.style.color = '#EF4444';
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          locationData.lat = pos.coords.latitude;
+          locationData.lng = pos.coords.longitude;
+          status.textContent = '✓ Localização obtida com sucesso';
+          status.style.color = '#22C55E';
+          document.getElementById('location-btn').style.borderColor = '#22C55E';
+        },
+        (err) => {
+          status.textContent = 'Não foi possível obter a localização. Insira a morada manualmente.';
+          status.style.color = '#EF4444';
+        }
+      );
+    }
+
+    async function submitRequest() {
+      try {
+        const formData = new FormData();
+        formData.append('guest_name', document.getElementById('guest-name').value);
+        formData.append('guest_phone', document.getElementById('guest-phone').value);
+        formData.append('location_lat', locationData.lat || '');
+        formData.append('location_lng', locationData.lng || '');
+        formData.append('location_address', document.getElementById('address').value || '');
+        formData.append('problem_type', selectedProblem);
+        formData.append('description', document.getElementById('description').value || '');
+
+        const response = await fetch('/api/assistance', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) throw new Error('Erro ao enviar pedido');
+
+        currentStep = 5;
+        showStep(5);
+      } catch (err) {
+        document.getElementById('error-msg').textContent = err.message;
+        document.getElementById('error-msg').style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>

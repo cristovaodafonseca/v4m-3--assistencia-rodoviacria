@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Histórico — V4M</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    .page-content { padding-top: 120px; padding-bottom: 64px; }
+    .page-header { margin-bottom: 32px; }
+    .page-header h1 { font-size: 1.75rem; margin-bottom: 4px; }
+    .page-header p { color: rgba(255,255,255,0.5); }
+    .filter-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+    .filter-tab { padding: 8px 16px; border-radius: 9999px; font-size: 0.8125rem; font-weight: 500; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.3s; }
+    .filter-tab:hover { border-color: rgba(215,255,0,0.3); }
+    .filter-tab.active { background: #D7FF00; color: #000; border-color: #D7FF00; }
+    .request-list { display: flex; flex-direction: column; gap: 12px; }
+    .request-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 20px; transition: all 0.3s; }
+    .request-card:hover { border-color: rgba(215,255,0,0.2); }
+    .request-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .request-header h3 { font-size: 1rem; font-weight: 600; }
+    .request-details { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+    .request-detail { font-size: 0.8125rem; }
+    .request-detail .label { color: rgba(255,255,255,0.4); margin-bottom: 2px; }
+    .request-detail .value { font-weight: 500; }
+    .request-actions { margin-top: 16px; display: flex; gap: 8px; }
+    .request-actions .btn { padding: 8px 16px; font-size: 0.8125rem; }
+    .empty-state { text-align: center; padding: 64px 24px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; }
+    .empty-state p { color: rgba(255,255,255,0.4); margin-bottom: 16px; }
+    .status-badge { padding: 4px 12px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <main class="page-content">
+    <div class="container">
+      <div class="page-header">
+        <h1>Histórico de <span class="text-yellow">Pedidos</span></h1>
+        <p>Todos os seus pedidos de assistência.</p>
+      </div>
+
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterRequests('all', this)">Todos</button>
+        <button class="filter-tab" onclick="filterRequests('pending', this)">Pendentes</button>
+        <button class="filter-tab" onclick="filterRequests('active', this)">Activos</button>
+        <button class="filter-tab" onclick="filterRequests('completed', this)">Concluídos</button>
+        <button class="filter-tab" onclick="filterRequests('cancelled', this)">Cancelados</button>
+      </div>
+
+      <div id="requests-container">
+        <div class="empty-state">
+          <p>A carregar pedidos...</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <script src="js/main.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    initApp('historico');
+
+    let allRequests = [];
+
+    async function loadRequests() {
+      try {
+        allRequests = await apiRequest('/api/assistance');
+        renderRequests(allRequests);
+      } catch (err) {
+        document.getElementById('requests-container').innerHTML = '<div class="empty-state"><p>Erro ao carregar pedidos.</p></div>';
+      }
+    }
+
+    function renderRequests(requests) {
+      const container = document.getElementById('requests-container');
+      if (requests.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <p>Nenhum pedido encontrado.</p>
+            <a href="/solicitar" class="btn btn-primary">Solicitar Assistência</a>
+          </div>`;
+        return;
+      }
+
+      container.innerHTML = requests.map(r => `
+        <div class="request-card">
+          <div class="request-header">
+            <h3>${getProblemLabel(r.problem_type)}</h3>
+            <span class="status-badge" style="background: ${getStatusColor(r.status)}20; color: ${getStatusColor(r.status)};">${getStatusLabel(r.status)}</span>
+          </div>
+          <div class="request-details">
+            <div class="request-detail">
+              <div class="label">Data</div>
+              <div class="value">${formatDate(r.created_at)}</div>
+            </div>
+            <div class="request-detail">
+              <div class="label">Localização</div>
+              <div class="value">${r.location_address || 'Não indicada'}</div>
+            </div>
+            <div class="request-detail">
+              <div class="label">Descrição</div>
+              <div class="value">${r.description || 'Sem descrição'}</div>
+            </div>
+            <div class="request-detail">
+              <div class="label">Foto</div>
+              <div class="value">${r.photo ? 'Sim' : 'Não'}</div>
+            </div>
+          </div>
+          ${r.status === 'pending' ? `
+            <div class="request-actions">
+              <button class="btn btn-outline" onclick="cancelRequest(${r.id})">Cancelar Pedido</button>
+            </div>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    function filterRequests(filter, btn) {
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+
+      let filtered = allRequests;
+      if (filter === 'pending') filtered = allRequests.filter(r => r.status === 'pending');
+      else if (filter === 'active') filtered = allRequests.filter(r => ['accepted', 'on_the_way', 'arrived'].includes(r.status));
+      else if (filter === 'completed') filtered = allRequests.filter(r => r.status === 'completed');
+      else if (filter === 'cancelled') filtered = allRequests.filter(r => r.status === 'cancelled');
+
+      renderRequests(filtered);
+    }
+
+    async function cancelRequest(id) {
+      if (!confirm('Tem certeza que deseja cancelar este pedido?')) return;
+      try {
+        await apiRequest(`/api/assistance/${id}/cancel`, { method: 'PUT' });
+        loadRequests();
+      } catch (err) {
+        alert('Erro ao cancelar pedido.');
+      }
+    }
+
+    loadRequests();
+  </script>
+</body>
+</html>

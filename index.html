@@ -1,0 +1,51 @@
+﻿<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>V4M — Nunca Fique Parado | Assistência para Motorizadas em Luanda</title>
+  <meta name="description" content="V4M — Assistência rápida e profissional para motorizadas em Luanda. Nunca fique parado. Disponível 24 horas, 7 dias.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <script>
+    function handleAssistanceClick() {
+      const token = localStorage.getItem('v4m_token');
+      if (token) {
+        window.location.href = '/solicitar';
+      } else {
+        window.location.href = '/entrar';
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="nav-placeholder"></div>
+
+  <main>
+    <section class="page-hero" style="padding-top: 200px; padding-bottom: 120px;">
+      <div class="container">
+        <div class="badge" style="margin-bottom: 32px;">
+          <span class="dot"></span>
+          Disponível 24h / 7 dias
+        </div>
+        <h1>Ficou parado com a<br>sua <span class="text-yellow">motorizada?</span></h1>
+        <p style="font-size: 1.125rem; max-width: 600px; margin: 24px auto 40px;">Nós vamos até si. Assistência rápida em Luanda e arredores, disponível 24 horas.</p>
+        <div style="display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap;">
+          <button onclick="handleAssistanceClick()" class="btn btn-primary">
+            Solicitar Assistência
+          </button>
+          <a href="servicos.html" class="btn btn-outline">
+            Ver Serviços
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <div id="footer-placeholder"></div>
+  <div id="whatsapp-placeholder"></div>
+  <script src="js/main.js"></script>
+  <script>initComponents('inicio');</script>
+</body>
+</html>
