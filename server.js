@@ -55,14 +55,17 @@ app.post('/api/auth/register', async (req, res) => {
     return res.status(400).json({ error: 'Nome, telefone e palavra-passe são obrigatórios' });
   }
 
-  const { data: existing } = await supabase.from('users').select('id').eq('phone', phone).single();
+  const { data: existing, error: existingErr } = await supabase.from('users').select('id').eq('phone', phone).maybeSingle();
+  if (existingErr) {
+    return res.status(500).json({ error: 'Erro ao verificar utilizador' });
+  }
   if (existing) {
     return res.status(400).json({ error: 'Este número de telefone já está registado' });
   }
 
   const hashedPassword = bcrypt.hashSync(password, 10);
   const { data, error } = await supabase.from('users').insert({
-    name, phone, email: email || null, password: hashedPassword
+    name, phone, email: email || null, password: hashedPassword, plan: 'none'
   }).select('id, name, phone, email, plan, plan_expiry').single();
 
   if (error) return res.status(500).json({ error: 'Erro ao criar conta' });
@@ -78,7 +81,10 @@ app.post('/api/auth/login', async (req, res) => {
     return res.status(400).json({ error: 'Telefone e palavra-passe são obrigatórios' });
   }
 
-  const { data: user } = await supabase.from('users').select('*').eq('phone', phone).single();
+  const { data: user, error: userErr } = await supabase.from('users').select('*').eq('phone', phone).maybeSingle();
+  if (userErr) {
+    return res.status(500).json({ error: 'Erro ao verificar utilizador' });
+  }
   if (!user) {
     return res.status(401).json({ error: 'Credenciais inválidas' });
   }
@@ -129,9 +135,47 @@ app.put('/api/user/password', authMiddleware, async (req, res) => {
 });
 
 // ========== ASSISTANCE ROUTES ==========
-app.post('/api/assistance', upload.single('photo'), async (req, res) => {
-  const { user_id, guest_name, guest_phone, location_lat, location_lng, location_address, problem_type, description } = req.body;
+// Use authMiddleware Conditionally if token is provided
+async function optionalAuth(req, res, next) {
+  const token = req.headers.authorization?.split(' ')[1];
+  if (token) {
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      req.userId = decoded.userId;
+    } catch (err) {}
+  }
+  next();
+}
+
+app.post('/api/assistance', optionalAuth, upload.single('photo'), async (req, res) => {
+  let { user_id, guest_name, guest_phone, location_lat, location_lng, location_address, problem_type, description } = req.body;
   const photo = req.file ? req.file.filename : null;
+  
+  // Se vier com token, usar esse user_id
+  if (req.userId) user_id = req.userId;
+
+  // Lógica de Planos
+  if (user_id) {
+    const { data: user } = await supabase.from('users').select('plan, plan_expiry').eq('id', user_id).single();
+    if (!user) return res.status(404).json({ error: 'Utilizador não encontrado' });
+    
+    if (user.plan === 'none' || !user.plan) {
+      return res.status(403).json({ error: 'Plano inativo. Atualize o seu plano para solicitar assistência.' });
+    }
+    
+    if (user.plan === 'basic') {
+      const now = new Date();
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      const { count } = await supabase.from('assistance_requests')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user_id)
+        .gte('created_at', firstDay);
+        
+      if (count >= 2) {
+        return res.status(403).json({ error: 'Atingiu o limite de 2 pedidos do seu plano Basic neste mês.' });
+      }
+    }
+  }
 
   const { data, error } = await supabase.from('assistance_requests').insert({
     user_id: user_id || null,

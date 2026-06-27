@@ -47,7 +47,12 @@ function logout() {
 // ========== API HELPERS ==========
 async function apiRequest(url, options = {}) {
   const token = getToken();
-  const headers = { 'Content-Type': 'application/json', ...options.headers };
+  const headers = { ...options.headers };
+  
+  if (!(options.body instanceof FormData)) {
+    headers['Content-Type'] = 'application/json';
+  }
+  
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const response = await fetch(API_BASE + url, { ...options, headers });

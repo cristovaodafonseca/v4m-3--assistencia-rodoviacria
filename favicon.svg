@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <rect width="64" height="64" rx="12" fill="#0a0a0a"/>
+  <text x="32" y="46" font-family="Arial Black, Arial, sans-serif" font-size="30" font-weight="900" text-anchor="middle" letter-spacing="-1">
+    <tspan fill="#ffffff">V</tspan><tspan fill="#D7FF00">4</tspan><tspan fill="#ffffff">M</tspan>
+  </text>
+</svg>

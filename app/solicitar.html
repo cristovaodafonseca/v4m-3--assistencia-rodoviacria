@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <title>Solicitar Assistência — V4M</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -184,8 +185,8 @@
 
   <div id="footer-placeholder"></div>
 
-  <script src="js/main.js"></script>
-  <script src="js/app.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/main.js"></script>
   <script>
     initApp('solicitar');
 
@@ -281,9 +282,7 @@
 
     async function submitRequest() {
       try {
-        const user = getUser();
         const formData = new FormData();
-        formData.append('user_id', user.id);
         formData.append('location_lat', locationData.lat || '');
         formData.append('location_lng', locationData.lng || '');
         formData.append('location_address', document.getElementById('address').value || '');
@@ -291,12 +290,10 @@
         formData.append('description', document.getElementById('description').value || '');
         if (photoFile) formData.append('photo', photoFile);
 
-        const response = await fetch('/api/assistance', {
+        const response = await apiRequest('/api/assistance', {
           method: 'POST',
           body: formData
         });
-
-        if (!response.ok) throw new Error('Erro ao enviar pedido');
 
         currentStep = 5;
         showStep(5);
