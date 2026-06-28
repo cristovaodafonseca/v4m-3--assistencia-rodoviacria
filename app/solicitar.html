@@ -13,7 +13,7 @@
     .page-content { padding-top: 120px; padding-bottom: 64px; }
     .step-indicator { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 40px; }
     .step-dot { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 0.8125rem; font-weight: 600; color: rgba(255,255,255,0.4); transition: all 0.3s; }
-    .step-dot.active { background: #D7FF00; color: #000; }
+    .step-dot.active { background: #ffc006; color: #000; }
     .step-dot.done { background: #22C55E; color: #fff; }
     .step-line { width: 40px; height: 2px; background: rgba(255,255,255,0.1); }
     .step-line.done { background: #22C55E; }
@@ -23,12 +23,12 @@
     .form-step p { color: rgba(255,255,255,0.5); margin-bottom: 24px; }
     .problem-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .problem-option { padding: 20px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; cursor: pointer; text-align: center; transition: all 0.3s; }
-    .problem-option:hover { border-color: rgba(215,255,0,0.3); }
-    .problem-option.selected { border-color: #D7FF00; background: rgba(215,255,0,0.05); }
+    .problem-option:hover { border-color: rgba(255,192,6,0.3); }
+    .problem-option.selected { border-color: #ffc006; background: rgba(255,192,6,0.05); }
     .problem-option span { font-size: 0.9375rem; font-weight: 500; }
-    .location-btn { width: 100%; padding: 24px; background: rgba(215,255,0,0.1); border: 1px dashed rgba(215,255,0,0.3); border-radius: 16px; cursor: pointer; text-align: center; transition: all 0.3s; margin-bottom: 16px; }
-    .location-btn:hover { background: rgba(215,255,0,0.15); }
-    .location-btn span { color: #D7FF00; font-weight: 500; }
+    .location-btn { width: 100%; padding: 24px; background: rgba(255,192,6,0.1); border: 1px dashed rgba(255,192,6,0.3); border-radius: 16px; cursor: pointer; text-align: center; transition: all 0.3s; margin-bottom: 16px; }
+    .location-btn:hover { background: rgba(255,192,6,0.15); }
+    .location-btn span { color: #ffc006; font-weight: 500; }
     .location-status { font-size: 0.8125rem; color: rgba(255,255,255,0.4); margin-top: 8px; }
     .step-actions { display: flex; gap: 12px; margin-top: 32px; }
     .step-actions .btn { flex: 1; }
@@ -41,7 +41,7 @@
     .success-icon { width: 80px; height: 80px; background: rgba(34, 197, 94, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; }
     .error-msg { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); color: #EF4444; padding: 12px 16px; border-radius: 12px; font-size: 0.875rem; display: none; margin-bottom: 16px; }
     .photo-upload { border: 2px dashed rgba(255,255,255,0.1); border-radius: 16px; padding: 32px; text-align: center; cursor: pointer; transition: all 0.3s; }
-    .photo-upload:hover { border-color: rgba(215,255,0,0.3); }
+    .photo-upload:hover { border-color: rgba(255,192,6,0.3); }
     .photo-upload input { display: none; }
     .photo-preview { max-width: 200px; border-radius: 12px; margin-top: 12px; }
   </style>
@@ -74,7 +74,7 @@
         <h2>Onde está?</h2>
         <p>Partilhe a sua localização para encontrarmos.</p>
         <div class="location-btn" id="location-btn" onclick="getLocation()">
-          <svg width="28" height="28" fill="none" stroke="#D7FF00" stroke-width="1.5" viewBox="0 0 24 24" style="margin-bottom: 8px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+          <svg width="28" height="28" fill="none" stroke="#ffc006" stroke-width="1.5" viewBox="0 0 24 24" style="margin-bottom: 8px;"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
           <br><span>Usar a minha localização</span>
           <div class="location-status" id="location-status"></div>
         </div>
@@ -250,7 +250,7 @@
     function getLocation() {
       const status = document.getElementById('location-status');
       status.textContent = 'A obter localização...';
-      status.style.color = '#D7FF00';
+      status.style.color = '#ffc006';
 
       navigator.geolocation.getCurrentPosition(
         (pos) => {
