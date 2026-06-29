@@ -166,8 +166,11 @@ function initApp(currentPage) {
 function getStatusLabel(status) {
   const labels = {
     'pending': 'Pendente',
+    'analysing': 'Em análise',
     'accepted': 'Aceite',
+    'team_dispatched': 'Equipa a caminho',
     'on_the_way': 'A caminho',
+    'in_progress': 'Em curso',
     'arrived': 'Chegou',
     'completed': 'Concluído',
     'cancelled': 'Cancelado'
@@ -178,8 +181,11 @@ function getStatusLabel(status) {
 function getStatusColor(status) {
   const colors = {
     'pending': '#F59E0B',
+    'analysing': '#3B82F6',
     'accepted': '#3B82F6',
+    'team_dispatched': '#8B5CF6',
     'on_the_way': '#8B5CF6',
+    'in_progress': '#D7FF00',
     'arrived': '#10B981',
     'completed': '#22C55E',
     'cancelled': '#EF4444'

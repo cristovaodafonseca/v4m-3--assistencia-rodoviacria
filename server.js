@@ -20,6 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/css', express.static(path.join(__dirname, 'css')));
 app.use('/js', express.static(path.join(__dirname, 'js')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/favicon.svg', express.static(path.join(__dirname, 'favicon.svg')));
 
 // Create uploads directory
 if (!fs.existsSync(path.join(__dirname, 'uploads'))) {
@@ -51,8 +52,8 @@ function authMiddleware(req, res, next) {
 app.post('/api/auth/register', async (req, res) => {
   const { name, phone, email, password } = req.body;
 
-  if (!name || !phone || !password) {
-    return res.status(400).json({ error: 'Nome, telefone e palavra-passe são obrigatórios' });
+  if (!name || !phone || !email || !password) {
+    return res.status(400).json({ error: 'Nome, telefone, email e palavra-passe são obrigatórios' });
   }
 
   const { data: existing, error: existingErr } = await supabase.from('users').select('id').eq('phone', phone).maybeSingle();
@@ -65,7 +66,7 @@ app.post('/api/auth/register', async (req, res) => {
 
   const hashedPassword = bcrypt.hashSync(password, 10);
   const { data, error } = await supabase.from('users').insert({
-    name, phone, email: email || null, password: hashedPassword, plan: 'none'
+    name, phone, email: email, password: hashedPassword, plan: 'none'
   }).select('id, name, phone, email, plan, plan_expiry').single();
 
   if (error) return res.status(500).json({ error: 'Erro ao criar conta' });
@@ -163,16 +164,42 @@ app.post('/api/assistance', optionalAuth, upload.single('photo'), async (req, re
       return res.status(403).json({ error: 'Plano inativo. Atualize o seu plano para solicitar assistência.' });
     }
     
-    if (user.plan === 'basic') {
+    if (user.plan_expiry && new Date(user.plan_expiry) < new Date()) {
+      return res.status(403).json({ error: 'O seu plano expirou. Renove o plano para continuar a solicitar assistência.' });
+    }
+    
+    // Obter limites dinâmicos da site_config
+    const { data: configRow } = await supabase.from('site_config').select('value').eq('key', 'plans').maybeSingle();
+    let limit = 0;
+    if (configRow && configRow.value) {
+      const planConfig = configRow.value.find(p => p.id === user.plan);
+      if (planConfig && planConfig.features) {
+        // Encontrar o limite na feature (ex: "4 assistências por ano")
+        const featureStr = planConfig.features.find(f => f.toLowerCase().includes('assistência'));
+        if (featureStr) {
+          const match = featureStr.match(/(\d+)/);
+          if (match) limit = parseInt(match[1], 10);
+        }
+      }
+    }
+    
+    // Fallbacks baseados nos planos atuais
+    if (limit === 0) {
+      if (user.plan === 'essencial') limit = 4;
+      else if (user.plan === 'protecao') limit = 4; // Ou número infinito? O site diz "4 assistências por ano"
+    }
+    
+    if (limit > 0) {
       const now = new Date();
-      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      // O site diz por ano, vamos contar os pedidos no ano corrente (ou desde o início do plano)
+      const firstDay = new Date(now.getFullYear(), 0, 1).toISOString();
       const { count } = await supabase.from('assistance_requests')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user_id)
         .gte('created_at', firstDay);
         
-      if (count >= 2) {
-        return res.status(403).json({ error: 'Atingiu o limite de 2 pedidos do seu plano Basic neste mês.' });
+      if (count >= limit) {
+        return res.status(403).json({ error: `Atingiu o limite de ${limit} pedidos do seu plano neste período.` });
       }
     }
   }

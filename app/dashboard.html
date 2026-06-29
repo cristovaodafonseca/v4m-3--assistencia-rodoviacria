@@ -165,10 +165,19 @@
                 <h4>${getProblemLabel(r.problem_type)}</h4>
                 <span class="status-badge" style="background: ${getStatusColor(r.status)}20; color: ${getStatusColor(r.status)};">${getStatusLabel(r.status)}</span>
               </div>
-              <div class="request-meta">
+              <div class="request-meta" style="margin-bottom: 8px;">
                 <span>${formatDate(r.created_at)}</span>
                 ${r.location_address ? `<span>${r.location_address}</span>` : ''}
               </div>
+              ${['team_dispatched', 'in_progress'].includes(r.status) && r.technician_name ? `
+                <div style="padding: 12px; background: rgba(255,192,6,0.1); border: 1px solid rgba(255,192,6,0.2); border-radius: 8px; margin-top: 12px;">
+                  <h5 style="color: #ffc006; font-size: 0.8125rem; margin-bottom: 4px;">Técnico a caminho</h5>
+                  <p style="font-size: 0.75rem; color: rgba(255,255,255,0.8); margin-bottom: 8px;">${r.technician_name} · ${r.technician_phone || ''}</p>
+                  ${r.technician_phone ? `
+                    <a href="tel:${r.technician_phone}" style="font-size: 0.75rem; color: #ffc006; text-decoration: none; font-weight: 600;">Ligar agora &rarr;</a>
+                  ` : ''}
+                </div>
+              ` : ''}
             </div>
           `).join('');
         }
@@ -196,7 +205,14 @@
       document.getElementById('notifications-panel').classList.toggle('open');
     }
 
-    loadDashboard();
+    let intervalId;
+    async function initDashboard() {
+      await loadDashboard();
+      if (intervalId) clearInterval(intervalId);
+      intervalId = setInterval(loadDashboard, 5000); // Poll every 5 seconds for "realtime"
+    }
+
+    initDashboard();
   </script>
 </body>
 </html>
