@@ -170,7 +170,7 @@ function getStatusLabel(status) {
     'accepted': 'Aceite',
     'team_dispatched': 'Equipa a caminho',
     'on_the_way': 'A caminho',
-    'in_progress': 'Em curso',
+    'in_progress': 'Em assistência',
     'arrived': 'Chegou',
     'completed': 'Concluído',
     'cancelled': 'Cancelado'

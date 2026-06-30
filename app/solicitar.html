@@ -166,22 +166,59 @@
         </div>
       </div>
 
-      <!-- Step 5: Sucesso -->
+      <!-- Step 5: Procurando Técnico (Sucesso) -->
       <div class="form-step" id="step-5">
-        <div class="success-card">
-          <div class="success-icon">
-            <svg width="40" height="40" fill="none" stroke="#22C55E" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+        <div class="success-card" id="waiting-state">
+          <div class="success-icon" style="background: rgba(255, 192, 6, 0.1);">
+            <div class="spinner" style="width: 40px; height: 40px; border: 4px solid rgba(255,192,6,0.3); border-top-color: #ffc006; border-radius: 50%; animation: spin 1s linear infinite;"></div>
           </div>
-          <h2 style="margin-bottom: 8px;">Pedido Enviado!</h2>
-          <p style="margin-bottom: 32px; color: rgba(255,255,255,0.5);">A nossa equipa foi notificada e em breve entrará em contacto consigo.</p>
+          <h2 style="margin-bottom: 8px;">A procurar técnico...</h2>
+          <p style="margin-bottom: 32px; color: rgba(255,255,255,0.5);">O seu pedido foi recebido. Estamos a contactar a equipa mais próxima.</p>
           <div style="display: flex; flex-direction: column; gap: 12px;">
-            <a href="/dashboard" class="btn btn-primary" style="width: 100%;">Voltar ao Dashboard</a>
-            <a href="/historico" class="btn btn-outline" style="width: 100%;">Ver Histórico</a>
+            <a href="/dashboard.html" class="btn btn-outline" style="width: 100%;">Ver no Dashboard</a>
+          </div>
+        </div>
+
+        <div class="success-card" id="dispatched-state" style="display: none;">
+          <div class="success-icon" style="background: rgba(139, 92, 246, 0.1);">
+            <svg width="40" height="40" fill="none" stroke="#8b5cf6" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/></svg>
+          </div>
+          <h2 style="margin-bottom: 8px;">Técnico a Caminho!</h2>
+          <p style="margin-bottom: 24px; color: rgba(255,255,255,0.5);">A nossa equipa já aceitou o pedido e está a caminho.</p>
+          
+          <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 24px; margin-bottom: 24px; text-align: left;">
+            <p style="font-size: 0.8125rem; color: rgba(255,255,255,0.5); margin-bottom: 4px;">Técnico / Equipa</p>
+            <p style="font-weight: 600; font-size: 1.125rem; margin-bottom: 16px;" id="tech-name">V4M Assistência</p>
+            
+            <a href="#" id="tech-phone-btn" class="btn btn-primary" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-2.896-1.596-5.54-4.24-7.136-7.136l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
+              Ligar Agora
+            </a>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <a href="/dashboard.html" class="btn btn-outline" style="width: 100%;">Voltar ao Dashboard</a>
+          </div>
+        </div>
+
+        <div class="success-card" id="in-progress-state" style="display: none;">
+          <div class="success-icon" style="background: rgba(215, 255, 0, 0.1);">
+            <svg width="40" height="40" fill="none" stroke="#D7FF00" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.42 15.17L17.25 21A2.652 2.652 0 0021 17.25l-5.877-5.877M11.42 15.17l2.496-3.03c.317-.384.74-.626 1.208-.766M11.42 15.17l-4.655 5.653a2.548 2.548 0 11-3.586-3.586l6.837-5.63m5.108-.233c.55-.164 1.163-.188 1.743-.14a4.5 4.5 0 004.486-6.336l-3.276 3.277a3.004 3.004 0 01-2.25-2.25l3.276-3.276a4.5 4.5 0 00-6.336 4.486c.091 1.076-.071 2.264-.904 2.95l-.102.085m-1.745 1.437L5.909 7.5H4.5L2.25 3.75l1.5-1.5L7.5 4.5v1.409l4.26 4.26m-1.745 1.437l1.745-1.437m6.615 8.206L15.75 15.75M4.867 19.125h.008v.008h-.008v-.008z"/></svg>
+          </div>
+          <h2 style="margin-bottom: 8px;">Cliente em Assistência</h2>
+          <p style="margin-bottom: 24px; color: rgba(255,255,255,0.5);">O técnico já chegou e está a resolver o seu problema.</p>
+          
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <a href="/dashboard.html" class="btn btn-primary" style="width: 100%;">Voltar ao Dashboard</a>
           </div>
         </div>
       </div>
     </div>
   </main>
+  
+  <style>
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
 
   <div id="footer-placeholder"></div>
 
@@ -280,6 +317,9 @@
       }
     }
 
+    let currentRequestId = null;
+    let pollInterval = null;
+
     async function submitRequest() {
       try {
         const formData = new FormData();
@@ -295,13 +335,53 @@
           body: formData
         });
 
+        if (response.id) {
+          currentRequestId = response.id;
+        }
+
         currentStep = 5;
         showStep(5);
         window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Start polling for status changes
+        if (currentRequestId) {
+          startPollingRequest(currentRequestId);
+        }
+
       } catch (err) {
         document.getElementById('error-msg').textContent = err.message;
         document.getElementById('error-msg').style.display = 'block';
       }
+    }
+
+    function startPollingRequest(id) {
+      if (pollInterval) clearInterval(pollInterval);
+      pollInterval = setInterval(async () => {
+        try {
+          const req = await apiRequest('/api/assistance/' + id);
+          
+          if (req.status === 'in_progress' || req.status === 'completed') {
+            clearInterval(pollInterval);
+            document.getElementById('waiting-state').style.display = 'none';
+            document.getElementById('dispatched-state').style.display = 'none';
+            document.getElementById('in-progress-state').style.display = 'block';
+          } 
+          else if (['team_dispatched', 'accepted', 'on_the_way'].includes(req.status)) {
+            document.getElementById('waiting-state').style.display = 'none';
+            document.getElementById('in-progress-state').style.display = 'none';
+            document.getElementById('dispatched-state').style.display = 'block';
+            
+            if (req.technician_name) {
+              document.getElementById('tech-name').textContent = req.technician_name;
+            }
+            if (req.technician_phone) {
+              document.getElementById('tech-phone-btn').href = 'tel:' + req.technician_phone;
+            }
+          }
+        } catch(e) {
+          console.error("Error polling request:", e);
+        }
+      }, 3000); // Poll every 3 seconds
     }
   </script>
 </body>
